@@ -1,0 +1,83 @@
+FROM anchorxia/musev:latest
+
+#MAINTAINER 维护者信息
+LABEL MAINTAINER="zkangchen"
+LABEL Email="zkangchen@tencent.com"
+LABEL Description="musev gradio image, from docker pull anchorxia/musev:latest"
+
+SHELL ["/bin/bash", "--login", "-c"]
+
+# Set up a new user named "user" with user ID 1000
+RUN useradd -m -u 1000 user
+
+# Switch to the "user" user
+USER user
+
+# Set home to the user's home directory
+ENV HOME=/home/user \
+	PATH=/home/user/.local/bin:$PATH
+
+# Set the working directory to the user's home directory
+WORKDIR $HOME/app
+
+
+################################################# INSTALLING FFMPEG ##################################################
+# RUN apt-get update ; apt-get install -y git build-essential gcc make yasm autoconf automake cmake libtool checkinstall libmp3lame-dev pkg-config libunwind-dev zlib1g-dev libssl-dev
+
+# RUN apt-get update \
+#     && apt-get clean \
+#     && apt-get install -y --no-install-recommends libc6-dev libgdiplus wget software-properties-common
+
+#RUN RUN apt-add-repository ppa:git-core/ppa && apt-get update && apt-get install -y git
+
+# RUN wget https://www.ffmpeg.org/releases/ffmpeg-4.0.2.tar.gz
+# RUN tar -xzf ffmpeg-4.0.2.tar.gz; rm -r ffmpeg-4.0.2.tar.gz
+# RUN cd ./ffmpeg-4.0.2; ./configure --enable-gpl --enable-libmp3lame --enable-decoder=mjpeg,png --enable-encoder=png --enable-openssl --enable-nonfree
+
+
+# RUN cd ./ffmpeg-4.0.2; make
+# RUN  cd ./ffmpeg-4.0.2; make install
+######################################################################################################################
+
+RUN echo "docker start"\ 
+  && whoami \
+  && which python \
+  && pwd
+
+RUN git clone -b main --recursive https://github.com/TMElyralab/MuseTalk.git
+
+RUN chmod -R 777 /home/user/app/MuseTalk
+
+
+
+RUN . /opt/conda/etc/profile.d/conda.sh  \
+    && echo "source activate musev" >> ~/.bashrc \
+    && conda activate musev \
+    && conda env list 
+#    && conda install ffmpeg
+
+RUN ffmpeg -codecs
+
+
+
+
+
+WORKDIR /home/user/app/MuseTalk/
+
+RUN pip install -r requirements.txt \
+    && pip install --no-cache-dir -U openmim \
+    && mim install mmengine \
+    && mim install "mmcv>=2.0.1" \
+    && mim install "mmdet>=3.1.0" \
+    && mim install "mmpose>=1.1.0" 
+
+
+# Add entrypoint script
+#RUN chmod 777 ./entrypoint.sh
+RUN ls -l  ./
+
+EXPOSE 7860
+
+# CMD ["/bin/bash", "-c", "python app.py"]
+CMD ["./install_ffmpeg.sh"]
+CMD ["./entrypoint.sh"]
