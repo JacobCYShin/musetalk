@@ -16,3 +16,6 @@ ffplay*
 debug
 exp_out
 .gradio
+onnx_models/
+onnx_models_fp16/
+trt_models/

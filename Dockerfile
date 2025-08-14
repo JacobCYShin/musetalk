@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.3.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
 
 WORKDIR /workspace
 
@@ -17,3 +17,7 @@ RUN pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 \
     --index-url https://download.pytorch.org/whl/cu121
   
 RUN pip install mmcv==2.0.1 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1.0/index.html
+
+RUN apt update && apt install python3-libnvinfer python3-libnvinfer-dev -y
+
+RUN pip install pycuda onnx onnxruntime-gpu==1.17.1
